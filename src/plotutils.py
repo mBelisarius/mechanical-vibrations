@@ -7,12 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-FLOAT_TYPE = np.float64
-
-
 def _round_to_n(x, n):
     """
-    Round a number to n significant algharisms.
+    Round a number to n significant algarisms.
 
     Parameters
     ------
@@ -33,6 +30,7 @@ def _round_to_n(x, n):
 
 def _get_ticks(data, n_ticks, n_dgt=None):
     """
+    Get the ticks rounded to n_gdt algarisms.
 
     Parameters
     ------
@@ -45,7 +43,6 @@ def _get_ticks(data, n_ticks, n_dgt=None):
     ticks : ndarray, shape(n_ticks,)
 
     """
-    # TODO: Documentation
     x_min = np.min(data)
     x_max = np.max(data)
 
@@ -53,12 +50,13 @@ def _get_ticks(data, n_ticks, n_dgt=None):
         max_value = max(abs(x_min), abs(x_max))
         n_dgt = math.ceil(math.log10(max_value + 1.)) - 1
 
-    x_span = np.linspace(x_min, x_max, n_ticks, dtype=FLOAT_TYPE)
-    return np.array([_round_to_n(x, n_dgt) for x in x_span], dtype=FLOAT_TYPE)
+    x_span = np.linspace(x_min, x_max, n_ticks)
+    return np.array([_round_to_n(x, n_dgt) for x in x_span])
 
 
 def _solve_function(fun, t_eval):
     """
+    Solve generic (non- or vectorized) function.
 
     Parameters
     ------
@@ -70,8 +68,7 @@ def _solve_function(fun, t_eval):
     sol : ndarray, shape(n,)
 
     """
-    # TODO: Documentation
-    sol = np.array([fun(t) for t in t_eval], dtype=FLOAT_TYPE)
+    sol = np.array([fun(t) for t in t_eval])
     return sol.T
 
 
@@ -79,6 +76,7 @@ def _plot(*data, vectorized=False, style=None, grid=True, xlabel=None,
           ylabel=None, units=('', ''), title=None, legend=None,
           legend_title=None, legend_loc='best', fprop=1.5, dpi=300):
     """
+    Plot simplifier.
 
     Parameters
     ----------
@@ -97,7 +95,6 @@ def _plot(*data, vectorized=False, style=None, grid=True, xlabel=None,
     dpi : int, optional, default: 300
 
     """
-    # TODO: Documentation
     plt.figure(figsize=(int(fprop * 4), 4), dpi=dpi)
     if vectorized:
         for _ in range(data[0].shape[0]):
@@ -120,6 +117,7 @@ def _plot_sub(*data, style=None, grid=True, xlabel=None, ylabel=None,
               units=('', ''), title=None, legend_label='Index', sharex=False,
               sharey=False, fprop=1.5, dpi=300):
     """
+    Subplot simplifier.
 
     Parameters
     ----------
@@ -137,7 +135,6 @@ def _plot_sub(*data, style=None, grid=True, xlabel=None, ylabel=None,
     dpi : int, optional, default: 300
 
     """
-    # TODO: Documentation
     # TODO: Generalize to nrows, ncols
     n_plots = data[1].shape[0]
     _data_t = np.repeat([data[0]], n_plots, axis=0) if sharex else data[0]
@@ -196,7 +193,7 @@ def plot_forces(F, t_eval, label='', units=('s', 'N'), fprop=1.5, dpi=300):
     """
     # TODO: Documentation
     # TODO: Vectorized?
-    data = np.array([F(t) for t in t_eval], dtype=FLOAT_TYPE)
+    data = np.array([F(t) for t in t_eval])
     style = {'linestyle': '-', 'linewidth': 0.5, 'antialiased': True}
     xlabel = 'Time'
     ylabel = f'Force {label}'
@@ -438,18 +435,18 @@ def plot_phases_sub(H_phases, s_eval, units=('rad/s', 'degree'),
     if sharey:
         yticks = _get_ticks(H_phases, n_ticks=n_ticks)
 
-    for _ in range(ndof):
-        for __ in range(ndof):
+    for i in range(ndof):
+        for j in range(ndof):
 
             if not sharey:
-                yticks = _get_ticks(H_phases[:, _, __], n_ticks=n_ticks)
+                yticks = _get_ticks(H_phases[:, i, j], n_ticks=n_ticks)
 
-            ax[_, __].plot(s_eval, H_phases[:, _, __], **style)
-            ax[_, __].grid()
-            ax[_, __].margins(x=0., tight=True)
-            ax[_, __].set_xticks(xticks)
-            ax[_, __].set_yticks(yticks)
-            ax[_, __].set_ylabel(f'{legend_label}{_}{__}')
+            ax[i, j].plot(s_eval, H_phases[:, i, j], **style)
+            ax[i, j].grid()
+            ax[i, j].margins(x=0., tight=True)
+            ax[i, j].set_xticks(xticks)
+            ax[i, j].set_yticks(yticks)
+            ax[i, j].set_ylabel(f'{legend_label}{i}{j}')
 
     fig.supxlabel(f'{xlabel} ({units[0]})')
     fig.supylabel(f'{ylabel} ({units[1]})')

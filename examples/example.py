@@ -1,15 +1,5 @@
 import numpy as np
-from vibr import VibrSystem
-from exp import get_natfreq, get_damping_ratio
-from plotutils import \
-    plot_modal_amplitudes, \
-    plot_forces, \
-    plot_forces_sub, \
-    plot_vibr, plot_vibr_sub, \
-    plot_receptances, \
-    plot_receptances_sub, \
-    plot_phases, \
-    plot_phases_sub
+from src import *
 
 
 if __name__ == '__main__':

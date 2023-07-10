@@ -5,7 +5,7 @@ experimental data of systems with mechanical vibration.
 """
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.optimize import root, root_scalar
+from scipy.optimize import root
 from scipy.signal import find_peaks
 
 
@@ -140,29 +140,29 @@ def get_damping_ratio(receptance, s, natfreq, interp='linear',
     """
     # Finding `||Hi|| / sqrt(2)` by minimizing the following function
     # Note that `20 * np.log10(np.sqrt(2)) == 10 * np.log10(2)`
-    _func = lambda s, i: \
+    func = lambda s, i: \
         np.abs(recept_fun(s) - (recept_natfreq[i] - 10 * np.log10(2)))
 
     damp_ratio = np.zeros_like(natfreq, dtype=FLOAT_TYPE)
     recept_fun = interp1d(s, receptance, kind=interp, assume_sorted=True)
     recept_natfreq = recept_fun(natfreq)
 
-    for _ in range(natfreq.shape[0]):
-        omega_indices, properties = find_peaks(- _func(s, _))
+    for i in range(natfreq.shape[0]):
+        omega_indices, properties = find_peaks(- func(s, i))
         omega_peaks = np.take(s, omega_indices)
-        omega_a = _get_nearest_value(omega_peaks, natfreq[_], loc='lower')
-        omega_b = _get_nearest_value(omega_peaks, natfreq[_], loc='upper')
+        omega_a = _get_nearest_value(omega_peaks, natfreq[i], loc='lower')
+        omega_b = _get_nearest_value(omega_peaks, natfreq[i], loc='upper')
 
         if better_tol:
-            omega_a_better = _root_always(_func, x0=omega_a, args=(_,),
+            omega_a_better = _root_always(func, x0=omega_a, args=(i,),
                                           atol=atol, maxiter=maxiter)
-            if omega_a_better < natfreq[_]:
+            if omega_a_better < natfreq[i]:
                 omega_a = omega_a_better
-            omega_b_better = _root_always(_func, x0=omega_b, args=(_,),
+            omega_b_better = _root_always(func, x0=omega_b, args=(i,),
                                           atol=atol, maxiter=maxiter)
-            if omega_b_better > natfreq[_]:
+            if omega_b_better > natfreq[i]:
                 omega_b = omega_b_better
 
-        damp_ratio[_] = (omega_b - omega_a) / (2 * natfreq[_])
+        damp_ratio[i] = (omega_b - omega_a) / (2 * natfreq[i])
 
     return damp_ratio

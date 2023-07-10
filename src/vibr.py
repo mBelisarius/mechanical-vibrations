@@ -4,13 +4,9 @@ Defines a n-DOF mechanical vibration system and methods for solving it.
 """
 
 import itertools
-
 import numpy as np
 from scipy.integrate import solve_ivp
 from scipy.linalg import cholesky, eig, eigh_tridiagonal, inv
-
-FLOAT_TYPE = np.float64
-COMPEX_TYPE = np.complex64
 
 
 class VibrSystem:
@@ -74,20 +70,17 @@ class VibrSystem:
         ValueError
 
         """
-        if damp_ratio is not None:
-            _damp_ratio = damp_ratio
-        elif self.damp_ratio is not None:
+        if damp_ratio is None and self.damp_ratio is not None:
             if self.check_uncoupled():
-                _damp_ratio = self.damp_ratio
+                damp_ratio = self.damp_ratio
             else:
                 raise UserWarning('The system must be uncoupled  to use the '
                                   'proportional mass-stiffnes method')
         else:
             raise ValueError('The damping ratio must be defined')
 
-        a_tr = np.array([[1, 1], self.spectral_matrix.diagonal()],
-                        dtype=FLOAT_TYPE)
-        b = 2 * np.outer(_damp_ratio, self.get_natfreq()).diagonal()
+        a_tr = np.array([[1, 1], self.spectral_matrix.diagonal()])
+        b = 2 * np.outer(damp_ratio, self.get_natfreq()).diagonal()
         zeta = np.linalg.solve(a_tr.T, b)
         self.damp_matrix = zeta[0] * self.mass + zeta[1] * self.stiff
         return self.damp_matrix
@@ -403,7 +396,7 @@ class VibrSystem:
         """
         self.receptance = np.array(
             [inv(self.stiff - self.mass * s ** 2 + 1j * self.damp_matrix * s)
-             for s in s_eval], dtype=COMPEX_TYPE)
+             for s in s_eval])
         return self.receptance
 
     def get_recept_db(self):
